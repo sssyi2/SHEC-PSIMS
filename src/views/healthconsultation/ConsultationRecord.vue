@@ -50,8 +50,8 @@
 import { defineComponent, ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import TheHeader from '@/components/layout/TheHeader.vue';
-import ConsultationSidebar from '@/components/consultation/ConsultationSidebar.vue';
-import ChatMessage from '@/components/consultation/ChatMessage.vue';
+import ConsultationSidebar from '@/components/healthconsultation/ConsultationSidebar.vue';
+import ChatMessage from '@/components/healthconsultation/ChatMessage.vue';
 import type { ChatMessage as ChatMessageType } from '@/types/consultation.ts';
 
 export default defineComponent({

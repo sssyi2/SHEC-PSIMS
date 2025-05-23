@@ -1,3 +1,4 @@
+<!-- filepath: e:\vuework\SHEC-PSIMS\SHEC-PSIMS\src\views\bigdata\DataAnalysis.vue -->
 <template>
   <div class="dashboard">
     <TheHeader />
@@ -7,6 +8,7 @@
       
       <div class="content-area">
         <StatsCards />
+        
         <div class="charts-container">
           <ColumnChart 
             title="每日就诊人数柱状图" 
@@ -17,6 +19,9 @@
             :chartData="departmentData" 
             class="chart" />
         </div>
+
+        <!-- 成本效益分析组件 -->
+        <CostBenefitAnalysis title="医疗成本效益分析" />
       </div>
     </div>
   </div>
@@ -29,6 +34,7 @@ import TheSidebar from '@/components/layout/TheSidebar.vue'
 import StatsCards from '@/components//bigdata/dashboard/StatsCards.vue'
 import ColumnChart from '@/components/bigdata/charts/ColumnChart.vue'
 import PieChart from '@/components//bigdata/charts/PieChart.vue'
+import CostBenefitAnalysis from '@/components/bigdata/charts/CostBenefitAnalysis.vue'
 
 export default defineComponent({
   name: 'Dashboard',
@@ -37,7 +43,8 @@ export default defineComponent({
     TheSidebar,
     StatsCards,
     ColumnChart,
-    PieChart
+    PieChart,
+    CostBenefitAnalysis // 添加新组件
   },
   setup() {
     const dailyVisitData = reactive({

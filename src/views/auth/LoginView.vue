@@ -20,7 +20,7 @@
 import { defineComponent, ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import LoginForm from '@/components/auth/LoginForm.vue';
-import { useAuthStore } from '@/stores/auth/auth.ts';
+import { useAuthStore } from '@/store/auth/auth';
 
 export default defineComponent({
   name: 'LoginView',

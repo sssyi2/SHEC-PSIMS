@@ -8,6 +8,38 @@ const userRoutes: Array<RouteRecordRaw> = [
     meta: {
       title: '个人中心'
     }
+  },
+   {
+    path: '/user/permissions',
+    name: 'UserPermissions',
+    component: () => import('@/views/user/PermissionsManageView.vue'),
+    meta: {
+      title: '用户权限管理',
+      requiresAuth: true,
+      requiresAdmin: true
+    }
+  },
+  
+  {
+    path: '/user/logs',
+    name: 'UserLogs',
+    component: () => import('@/views/user/LogsView.vue'),
+    meta: {
+      title: '日志查看',
+      requiresAuth: true,
+      requiresAdmin: true
+    }
+  },
+  
+  {
+    path: '/user/feedback',
+    name: 'UserFeedback',
+    component: () => import('@/views/user/FeedbackView.vue'),
+    meta: {
+      title: '查看反馈',
+      requiresAuth: true,
+      requiresAdmin: true
+    }
   }
 //   {
 //     path: '/profile',

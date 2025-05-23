@@ -31,7 +31,7 @@
                 @cancel="cancelEdit"
               />
             </div>
-            <div v-else-if="currentView === 'detail'">
+            <div v-else-if="currentView === 'detail' && currentAdvice">
               <MedicalAdviceDetail 
                 :advice="currentAdvice"
                 @edit="editAdvice"

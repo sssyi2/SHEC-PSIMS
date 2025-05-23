@@ -129,7 +129,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, PropType, watch } from 'vue'
+import { defineComponent, reactive, watch } from 'vue'
+import type { PropType } from 'vue'
 
 interface UserInfo {
   username: string;

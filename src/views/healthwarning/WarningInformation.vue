@@ -40,7 +40,7 @@
         </div>
         
         <WarningDetail
-          v-if="showDetailDialog"
+          v-if="showDetailDialog && selectedWarning"
           :warning="selectedWarning"
           @close="showDetailDialog = false"
           @process="handleProcessWarning"
