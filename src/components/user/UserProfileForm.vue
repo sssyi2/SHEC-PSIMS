@@ -11,11 +11,11 @@
         <label class="form-label">姓名：</label>
         <input 
           v-if="isEditing" 
-          v-model="formData.username" 
+          v-model="formData.real_name" 
           type="text" 
           class="form-input" 
         />
-        <div v-else class="form-value">{{ userInfo.username }}</div>
+        <div v-else class="form-value">{{ formData.real_name }}</div>
       </div>
       
       <div class="form-group">
@@ -28,7 +28,7 @@
           <option value="男">男</option>
           <option value="女">女</option>
         </select>
-        <div v-else class="form-value">{{ userInfo.gender }}</div>
+        <div v-else class="form-value">{{ formData.gender }}</div>
       </div>
       
       <div class="form-group">
@@ -41,18 +41,18 @@
           />
           <span class="form-suffix">岁</span>
         </div>
-        <div v-else class="form-value">{{ userInfo.age }} 岁</div>
+        <div v-else class="form-value">{{ formData.age }} 岁</div>
       </div>
       
       <div class="form-group">
         <label class="form-label">手机号：</label>
         <input 
           v-if="isEditing" 
-          v-model="formData.phone" 
+          v-model="formData.phoneNumber" 
           type="text" 
           class="form-input" 
         />
-        <div v-else class="form-value">{{ userInfo.phone }}</div>
+        <div v-else class="form-value">{{ formData.phoneNumber }}</div>
       </div>
       
       <div class="form-group">
@@ -63,7 +63,7 @@
           type="email" 
           class="form-input" 
         />
-        <div v-else class="form-value">{{ userInfo.email || '未设置' }}</div>
+        <div v-else class="form-value">{{ formData.email || '未设置' }}</div>
       </div>
       
       <div class="form-group">
@@ -77,13 +77,13 @@
           <option value="美国">美国</option>
           <option value="英国">英国</option>
         </select>
-        <div v-else class="form-value">{{ userInfo.country }}</div>
+        <div v-else class="form-value">{{ formData.country }}</div>
       </div>
       
       <div class="form-group">
         <label class="form-label">所在地区：</label>
         <div v-if="isEditing" class="region-selects">
-          <select v-model="formData.province" class="form-select region-select">
+          <select v-model="formData.area" class="form-select region-select">
             <option value="北京">北京</option>
             <option value="上海">上海</option>
             <option value="广东">广东</option>
@@ -94,9 +94,20 @@
             <option value="广州市">广州市</option>
           </select>
         </div>
-        <div v-else class="form-value">{{ userInfo.province }} {{ userInfo.city }}</div>
+        <div v-else class="form-value">{{ formData.area }} {{ formData.city }}</div>
       </div>
       
+ <div class="form-group">
+        <label class="form-label">所属部门：</label>
+        <input 
+          v-if="isEditing" 
+          v-model="formData.department" 
+          type="text" 
+          class="form-input" 
+        />
+        <div v-else class="form-value">{{ formData.department || '未设置' }}</div>
+      </div>
+
       <div class="form-group">
         <label class="form-label">联系地址：</label>
         <input 
@@ -105,7 +116,7 @@
           type="text" 
           class="form-input" 
         />
-        <div v-else class="form-value">{{ userInfo.address || '未设置' }}</div>
+        <div v-else class="form-value">{{ formData.address || '未设置' }}</div>
       </div>
       
       <div class="form-actions">
@@ -129,26 +140,38 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, watch } from 'vue'
+import { defineComponent, onMounted, reactive, watch } from 'vue'
+import axios from 'axios';
 import type { PropType } from 'vue'
+import type { userInfo } from '@/types/user.ts';
 
-interface UserInfo {
-  username: string;
-  age: string;
-  gender: string;
-  phone: string;
-  email: string;
-  country: string;
-  province: string;
-  city: string;
-  address: string;
+// interface userInfo  {
+ 
+//   // id: number;
+//   UserName: string;
+//   age: number;
+//   email: string;
+//   phoneNumber: string;
+//   address: string;
+//   gender: string;
+//   country: string;
+//   city: string;
+//   area: string;
+//   PasswordHash: string;
+//   real_name: string;
+//   role: string;
+//   department: string;
+// }
+interface AResponse<T>  {
+  message: string;
+  code: number;
+  data: userInfo;
 }
-
 export default defineComponent({
   name: 'UserProfileForm',
   props: {
     userInfo: {
-      type: Object as PropType<UserInfo>,
+      type: Object as PropType<userInfo>,
       required: true
     },
     isEditing: {
@@ -158,32 +181,69 @@ export default defineComponent({
   },
   emits: ['save', 'edit'],
   setup(props, { emit }) {
-    // 表单数据
+     // 表单数据
     const formData = reactive({ ...props.userInfo })
+   
+    //  //获取用户信息
+      const fetchUserInfo = async () => {
+       try {
+         const response = await axios.get<AResponse<userInfo>>('http://localhost:8080/user/modify/list/19');
+          if(response.data.code===200){
+            // alert('成功获取用户信息')
+            Object.assign(formData, response.data.data);
+            
+          }else if(response.data.code===507)
+          {
+            alert('用户不存在');
+            console.log('用户不存在');
+          }
     
+      } catch (error) {
+        console.error('获取用户信息失败:', error);
+        alert('获取用户信息失败，请稍后再试。');
+      }
+    };
+  onMounted(fetchUserInfo);
+       const jsonString=JSON.stringify(formData);
     // 当 userInfo 变化时更新表单数据
     watch(() => props.userInfo, (newValue) => {
       Object.assign(formData, newValue)
     })
-    
+    //  const jsonString=JSON.stringify(formData);
     // 开始编辑
     const startEdit = () => {
       emit('edit')
     }
     
     // 保存个人资料
-    const saveProfile = () => {
-      // 这里可以添加表单验证逻辑
-      emit('save', { ...formData })
+    const saveProfile = async() => {
+       try {
+        // 这里可以添加表单验证逻辑
+        const response = await axios.post<AResponse<userInfo>>('http://localhost:8080/user/modify/doctor/19', formData,{ 
+    headers: {
+        'Content-Type': 'application/json'
     }
-    
+  });
+        if (response.data.code === 200) {
+          alert('保存成功！');
+          emit('save', { ...formData });
+        } else {
+          alert('保存失败，请稍后再试。');
+        }
+      } catch (error) {
+        console.error('保存失败:', error);
+        alert('保存失败，请稍后再试。');
+      }
+     
+    }
+  
     return {
       formData,
       startEdit,
       saveProfile
     }
   }
-})
+});
 </script>
 
 <style scoped>

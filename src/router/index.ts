@@ -6,6 +6,7 @@ import healthRoutes from './elderlyhealth'
 import warningRoutes from './healthwarning'
 import consultationRoutes from './healthconsultation'
 import userRoutes from './user'
+import authRoutes from './auth'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -17,7 +18,8 @@ const routes: Array<RouteRecordRaw> = [
   ...healthRoutes,
   ...warningRoutes,
   ...consultationRoutes,
-  ...userRoutes
+  ...userRoutes,
+  ...authRoutes
 ]
 
 const router = createRouter({

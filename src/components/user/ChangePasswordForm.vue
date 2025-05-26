@@ -53,7 +53,30 @@
 
 <script lang="ts">
 import { defineComponent, reactive, ref } from 'vue'
-
+import axios from 'axios';
+import {ElMessage}  from 'element-plus';
+interface UserInfo  {
+ 
+  // id: number;
+  UserName: string;
+  age: number;
+  email: string;
+  phoneNumber: string;
+  address: string;
+  gender: string;
+  country: string;
+  city: string;
+  area: string;
+  PasswordHash: string;
+  real_name: string;
+  role: string;
+  department: string;
+}
+interface AResponse<T>  {
+  message: string;
+  code: number;
+  data: UserInfo;
+}
 export default defineComponent({
   name: 'ChangePasswordForm',
   setup() {
@@ -90,32 +113,100 @@ export default defineComponent({
       return errors.value.length === 0
     }
     
-    // 修改密码
-    const changePassword = () => {
-      if (validateForm()) {
-        // 在实际应用中，这里应该发送请求到后端修改密码
-        console.log('提交修改密码请求:', {
-          oldPassword: formData.oldPassword,
-          newPassword: formData.newPassword
-        })
-        
-        // 模拟请求成功
-        alert('密码修改成功')
-        
-        // 清空表单
-        formData.oldPassword = ''
-        formData.newPassword = ''
-        formData.confirmPassword = ''
-      }
-    }
+  //   // 修改密码
+  //   const changePassword = () => {
+  //     console.log('修改密码');
+  //       if (!validateForm()) {
+  //   console.error("表单验证失败");
+  //   ElMessage.warning("请正确填写所有字段");
+  //   return;
+  // }
+  //     if (validateForm()) {
+  //       axios.post('http://localhost:8080/user/modify/19',{
+  //        oldPassword: formData.oldPassword,
+  //        newPassword: formData.newPassword,
+  //    confirmPassword: formData.confirmPassword
+  //     },{
+  //       headers: {
+  //         'Content-Type': 'application/json'
+  //       }
+  //     }) .then(response => {
+  //       console.log('密码修改成功');
+  //         //  ElMessage.success('密码修改成功');
+  //          console.log(response.data);
+  //          // 清空表单
+  //          formData.oldPassword = '';
+  //          formData.newPassword = '';
+  //          formData.confirmPassword = '';
+  //        })
+  //       .catch(error => {
+  //          ElMessage.error('密码修改失败: ' + error.message);
+  //        });
+  //     }
+      
+  //   };
     
+  const changePassword = async () => {
+   
+  console.log('开始修改密码流程...');
+  try {
+    const params = new URLSearchParams();
+    params.append('oldPassword', formData.oldPassword);
+    params.append('newPassword', formData.newPassword);
+    params.append('confirmPassword', formData.confirmPassword);
+
+
+    const response = await axios.post<AResponse<UserInfo>>(`http://localhost:8080/user/modify/19?${params.toString()}`, {}, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+       
+      }
+    });
+if (validateForm()) {
+    console.log('完整响应:', response.data);
+    
+    if (response.data.code === 200) {
+      alert('密码修改成功');
+      formData.oldPassword = '';
+      formData.newPassword = '';
+      formData.confirmPassword = '';
+    } else if(response.data.code===535){
+      alert('新密码不能为空');
+     
+    }else if(response.data.code==536){
+      alert('旧密码不能为空');
+    }else if(response.data.code===540){
+      alert('密码错误');
+    }else if(response.data.code===537){
+      alert('新密码不能与旧密码相同');
+    }else if(response.data.code===538){
+      alert('新密码与确认密码不相同');
+    }else if(response.data.code===539){
+      alert('修改密码失败');
+    }
+  }
+  } catch (error: any) {
+    console.error('完整错误:', error);
+    if (error.response) {
+      
+      console.error('错误响应数据:', error.response.data);
+      const serverMessage = error.response.data.message || 
+                          error.response.data.error ||
+                          JSON.stringify(error.response.data);
+      ElMessage.error(`服务器返回错误: ${serverMessage}`);
+    } else {
+      ElMessage.error('请求失败: ' + error.message);
+    }
+  }
+  
+};
     return {
       formData,
       errors,
       changePassword
     }
   }
-})
+});
 </script>
 
 <style scoped>

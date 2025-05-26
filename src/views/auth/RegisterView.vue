@@ -20,7 +20,7 @@
 import { defineComponent, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import RegisterForm from '@/components/auth/RegisterForm.vue';
-import { useAuthStore } from '@/stores/auth/auth.ts';
+import { useAuthStore } from '@/store/auth/auth.ts';
 
 export default defineComponent({
   name: 'RegisterView',
