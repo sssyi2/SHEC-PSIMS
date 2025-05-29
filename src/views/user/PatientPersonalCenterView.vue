@@ -47,7 +47,7 @@ import PatientPointsManagement from '@/components/user/PatientPointsManagement.v
 import PatientContactSupport from '@/components/user/PatientContactSupport.vue';
 import { useUserStore } from '@/store/user';
 import { useRoute } from 'vue-router';
-import type { UserInfo, PasswordChangeRequest, PointsHistory } from '@/types/user';
+import type { userInfo, PointsHistory, PasswordChangeRequest } from '@/types/user';
 
 export default defineComponent({
   name: 'PatientPersonalCenterView',
@@ -66,19 +66,22 @@ export default defineComponent({
     // 当前显示的视图
     const currentView = ref('basic-info');
     
-    // 用户信息
-    const userInfo = ref<UserInfo>({
-      id: '',
-      username: '',
-      name: '',
-      age: '',
-      gender: '男',
-      phone: '',
+    // 用户信息 - 修改为符合 user.ts 中定义的接口
+    const userInfo = ref<userInfo>({
+      id: 0,
+      UserName: '',
+      age: 0,
       email: '',
+      phoneNumber: '', // 注意：这里从 phone 改为 phoneNumber
+      address: '',
+      gender: '男',
       country: '中国',
-      province: '北京',
       city: '北京市',
-      address: ''
+      area: '', // 添加了 area 字段
+      passwordHash: '', // 添加了 passwordHash 字段
+      real_name: '', // 添加了 real_name 字段
+      role: '', // 添加了 role 字段
+      department: '' // 添加了 department 字段
     });
     
     // 积分信息
@@ -123,19 +126,22 @@ export default defineComponent({
         // const response = await userStore.getUserInfo();
         // userInfo.value = response;
         
-        // 模拟数据
+        // 模拟数据 - 修改为符合 user.ts 中定义的接口
         userInfo.value = {
-          id: '1001',
-          username: 'patient001',
-          name: '张涛',
-          age: '65',
-          gender: '男',
-          phone: '13812345678',
+          id: 1001,
+          UserName: 'patient001',
+          age: 65,
           email: 'patient001@example.com',
+          phoneNumber: '13812345678', // 从 phone 改为 phoneNumber
+          address: '海淀区西二旗大街1号',
+          gender: '男',
           country: '中国',
-          province: '北京',
           city: '北京市',
-          address: '海淀区西二旗大街1号'
+          area: '海淀区', // 添加了 area 字段
+          passwordHash: '******', // 添加了 passwordHash 字段
+          real_name: '张涛', // 添加了 real_name 字段，原来使用的是 name
+          role: 'patient', // 添加了 role 字段
+          department: '无' // 添加了 department 字段
         };
       } catch (error) {
         console.error('Error fetching user info:', error);
@@ -186,7 +192,7 @@ export default defineComponent({
     };
     
     // 保存用户信息
-    const saveUserInfo = async (updatedInfo: UserInfo) => {
+    const saveUserInfo = async (updatedInfo: userInfo) => {
       try {
         // 在实际应用中应该调用API保存用户信息
         // await userStore.updateUserInfo(updatedInfo);

@@ -2,14 +2,84 @@ import type { RouteRecordRaw } from 'vue-router'
 
 const userRoutes: Array<RouteRecordRaw> = [
   {
-    path: '/personal-center',
-    name: 'PersonalCenter',
-    component: () => import('@/views/user/PersonalCenter.vue'),
+    path: '/doctor-personal-center',
+    name: 'DoctorPersonalCenter',
+    component: () => import('@/views/user/DoctorPersonalCenter.vue'),
     meta: {
-      title: '个人中心'
+      title: '个人中心',
+      requiresAuth: true,
+      requiresDoctor: true
     }
   },
-   {
+  {
+    path: '/patient-personal-center',
+    name: 'PatientPersonalCenter',
+    component: () => import('@/views/user/PatientPersonalCenterView.vue'),
+    meta: {
+      title: '患者个人中心',
+      requiresAuth: true,
+      requiresPatient: true
+    },
+    // 添加子路由，使得可以通过直接访问特定路径打开对应视图
+    children: [
+      {
+        path: 'basic-info',
+        name: 'PatientBasicInfo',
+        component: () => import('@/views/user/PatientPersonalCenterView.vue'),
+        props: { defaultView: 'basic-info' },
+        meta: {
+          title: '基本资料',
+          requiresAuth: true,
+          requiresPatient: true
+        }
+      },
+      {
+        path: 'change-password',
+        name: 'PatientChangePassword',
+        component: () => import('@/views/user/PatientPersonalCenterView.vue'),
+        props: { defaultView: 'change-password' },
+        meta: {
+          title: '修改密码',
+          requiresAuth: true,
+          requiresPatient: true
+        }
+      },
+      {
+        path: 'points',
+        name: 'PatientPoints',
+        component: () => import('@/views/user/PatientPersonalCenterView.vue'),
+        props: { defaultView: 'points' },
+        meta: {
+          title: '积分管理',
+          requiresAuth: true,
+          requiresPatient: true
+        }
+      },
+      {
+        path: 'contact-support',
+        name: 'PatientContactSupport',
+        component: () => import('@/views/user/PatientPersonalCenterView.vue'),
+        props: { defaultView: 'contact-support' },
+        meta: {
+          title: '联系客服',
+          requiresAuth: true,
+          requiresPatient: true
+        }
+      },
+      {
+        path: 'delete-account',
+        name: 'PatientDeleteAccount',
+        component: () => import('@/views/user/PatientPersonalCenterView.vue'),
+        props: { defaultView: 'delete-account' },
+        meta: {
+          title: '注销账户',
+          requiresAuth: true,
+          requiresPatient: true
+        }
+      }
+    ]
+  },
+  {
     path: '/user/permissions',
     name: 'UserPermissions',
     component: () => import('@/views/user/PermissionsManageView.vue'),
@@ -19,7 +89,6 @@ const userRoutes: Array<RouteRecordRaw> = [
       requiresAdmin: true
     }
   },
-  
   {
     path: '/user/logs',
     name: 'UserLogs',
@@ -30,7 +99,6 @@ const userRoutes: Array<RouteRecordRaw> = [
       requiresAdmin: true
     }
   },
-  
   {
     path: '/user/feedback',
     name: 'UserFeedback',
@@ -40,47 +108,8 @@ const userRoutes: Array<RouteRecordRaw> = [
       requiresAuth: true,
       requiresAdmin: true
     }
-  }
-//   {
-//     path: '/profile',
-//     name: 'UserProfile',
-//     component: () => import('@/views/user/UserProfile.vue'),
-//     meta: {
-//       title: '个人资料'
-//     }
-//   },
-//   {
-//     path: '/settings',
-//     name: 'UserSettings',
-//     component: () => import('@/views/user/UserSettings.vue'),
-//     meta: {
-//       title: '账号设置'
-//     }
-//   },
-//   {
-//     path: '/work-schedule',
-//     name: 'WorkSchedule',
-//     component: () => import('@/views/user/WorkSchedule.vue'),
-//     meta: {
-//       title: '工作日程'
-//     }
-//   },
-//   {
-//     path: '/notifications',
-//     name: 'Notifications',
-//     component: () => import('@/views/user/Notifications.vue'),
-//     meta: {
-//       title: '消息通知'
-//     }
-//   },
-//   {
-//     path: '/performance',
-//     name: 'Performance',
-//     component: () => import('@/views/user/Performance.vue'),
-//     meta: {
-//       title: '工作绩效'
-//     }
-//   }
+  },
+
 ]
 
 export default userRoutes

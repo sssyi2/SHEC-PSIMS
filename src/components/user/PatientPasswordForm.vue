@@ -176,7 +176,8 @@ export default defineComponent({
       
       const passwordData: PasswordChangeRequest = {
         currentPassword: form.currentPassword,
-        newPassword: form.newPassword
+        newPassword: form.newPassword,
+        confirmPassword: form.confirmPassword
       };
       
       emit('save', passwordData);

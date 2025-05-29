@@ -13,12 +13,12 @@
             <label for="username">用户名：</label>
             <input 
               id="username" 
-              v-model="formData.username" 
+              v-model="formData.UserName" 
               type="text" 
               required 
               :disabled="isEdit"
             />
-            <div v-if="errors.username" class="error-text">{{ errors.username }}</div>
+            <div v-if="errors.UserName" class="error-text">{{ errors.UserName }}</div>
           </div>
           
           <div class="form-group">
@@ -26,7 +26,7 @@
             <div class="password-field">
               <input 
                 id="password" 
-                v-model="formData.password" 
+                v-model="formData.passwordHash" 
                 :type="showPassword ? 'text' : 'password'" 
                 required 
                 placeholder="请输入密码"
@@ -40,18 +40,18 @@
                 <span v-else>显示</span>
               </button>
             </div>
-            <div v-if="errors.password" class="error-text">{{ errors.password }}</div>
+            <div v-if="errors.passwordHash" class="error-text">{{ errors.passwordHash }}</div>
           </div>
           
           <div class="form-group">
             <label for="name">姓名：</label>
             <input 
               id="name" 
-              v-model="formData.name" 
+              v-model="formData.real_name" 
               type="text" 
               required
             />
-            <div v-if="errors.name" class="error-text">{{ errors.name }}</div>
+            <div v-if="errors.real_name" class="error-text">{{ errors.real_name }}</div>
           </div>
           
           <div class="form-group">
@@ -61,6 +61,91 @@
               <option value="doctor">医生</option>
               <option value="patient">病人</option>
             </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="email">邮箱：</label>
+            <input 
+              id="email" 
+              v-model="formData.email" 
+              type="email"
+            />
+            <div v-if="errors.email" class="error-text">{{ errors.email }}</div>
+          </div>
+          
+          <div class="form-group">
+            <label for="phoneNumber">手机号码：</label>
+            <input 
+              id="phoneNumber" 
+              v-model="formData.phoneNumber" 
+              type="tel"
+            />
+            <div v-if="errors.phoneNumber" class="error-text">{{ errors.phoneNumber }}</div>
+          </div>
+          
+          <div class="form-group">
+            <label for="gender">性别：</label>
+            <select id="gender" v-model="formData.gender">
+              <option value="男">男</option>
+              <option value="女">女</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="age">年龄：</label>
+            <input 
+              id="age" 
+              v-model.number="formData.age" 
+              type="number" 
+              min="0"
+            />
+          </div>
+          
+          <div class="form-group">
+            <label for="department">部门：</label>
+            <input 
+              id="department" 
+              v-model="formData.department" 
+              type="text"
+            />
+          </div>
+          
+          <div class="form-group">
+            <label for="address">地址：</label>
+            <input 
+              id="address" 
+              v-model="formData.address" 
+              type="text"
+            />
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="country">国家：</label>
+              <input 
+                id="country" 
+                v-model="formData.country" 
+                type="text"
+              />
+            </div>
+            
+            <div class="form-group">
+              <label for="city">城市：</label>
+              <input 
+                id="city" 
+                v-model="formData.city" 
+                type="text"
+              />
+            </div>
+            
+            <div class="form-group">
+              <label for="area">地区：</label>
+              <input 
+                id="area" 
+                v-model="formData.area" 
+                type="text"
+              />
+            </div>
           </div>
         </form>
       </div>
@@ -76,13 +161,13 @@
 <script lang="ts">
 import { defineComponent, reactive, ref, watch } from 'vue';
 import type { PropType } from 'vue';
-import type { User } from '@/types/user.ts';
+import type { userInfo } from '@/types/user';
 
 export default defineComponent({
   name: 'UserFormDialog',
   props: {
     user: {
-      type: Object as PropType<User | null>,
+      type: Object as PropType<userInfo | null>,
       default: null
     },
     isEdit: {
@@ -92,30 +177,43 @@ export default defineComponent({
   },
   emits: ['save', 'cancel'],
   setup(props, { emit }) {
-    const formData = reactive({
+    const formData = reactive<userInfo>({
       id: 0,
-      username: '',
-      password: '',
-      name: '',
-      role: 'patient'
+      UserName: '',
+      passwordHash: '',
+      real_name: '',
+      role: 'patient',
+      age: 0,
+      email: '',
+      phoneNumber: '',
+      address: '',
+      gender: '男',
+      country: '中国',
+      city: '',
+      area: '',
+      department: ''
     });
     
     const showPassword = ref(false);
     
     const errors = reactive({
-      username: '',
-      password: '',
-      name: ''
+      UserName: '',
+      passwordHash: '',
+      real_name: '',
+      email: '',
+      phoneNumber: ''
     });
     
     // 监听用户数据变化
     watch(() => props.user, (newVal) => {
       if (newVal) {
-        formData.id = newVal.id;
-        formData.username = newVal.username;
-        formData.password = props.isEdit ? '' : newVal.password;
-        formData.name = newVal.name;
-        formData.role = newVal.role;
+        // 使用对象解构来复制所有属性
+        Object.assign(formData, newVal);
+        
+        // 如果是编辑模式，清空密码字段（不显示原始密码）
+        if (props.isEdit) {
+          formData.passwordHash = '';
+        }
       }
     }, { immediate: true });
     
@@ -129,33 +227,47 @@ export default defineComponent({
       let isValid = true;
       
       // 重置错误信息
-      errors.username = '';
-      errors.password = '';
-      errors.name = '';
+      errors.UserName = '';
+      errors.passwordHash = '';
+      errors.real_name = '';
+      errors.email = '';
+      errors.phoneNumber = '';
       
       // 验证用户名
-      if (!formData.username.trim()) {
-        errors.username = '用户名不能为空';
+      if (!formData.UserName.trim()) {
+        errors.UserName = '用户名不能为空';
         isValid = false;
-      } else if (formData.username.length < 3) {
-        errors.username = '用户名长度不能少于3个字符';
+      } else if (formData.UserName.length < 3) {
+        errors.UserName = '用户名长度不能少于3个字符';
         isValid = false;
       }
       
       // 验证密码（仅在添加模式或编辑模式下填写密码时验证）
-      if (!props.isEdit || formData.password) {
-        if (!formData.password) {
-          errors.password = '密码不能为空';
+      if (!props.isEdit || formData.passwordHash) {
+        if (!formData.passwordHash) {
+          errors.passwordHash = '密码不能为空';
           isValid = false;
-        } else if (formData.password.length < 6) {
-          errors.password = '密码长度不能少于6个字符';
+        } else if (formData.passwordHash.length < 6) {
+          errors.passwordHash = '密码长度不能少于6个字符';
           isValid = false;
         }
       }
       
       // 验证姓名
-      if (!formData.name.trim()) {
-        errors.name = '姓名不能为空';
+      if (!formData.real_name.trim()) {
+        errors.real_name = '姓名不能为空';
+        isValid = false;
+      }
+      
+      // 验证邮箱格式（如果提供了邮箱）
+      if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+        errors.email = '请输入有效的邮箱地址';
+        isValid = false;
+      }
+      
+      // 验证手机号码格式（如果提供了手机号码）
+      if (formData.phoneNumber && !/^1[3-9]\d{9}$/.test(formData.phoneNumber)) {
+        errors.phoneNumber = '请输入有效的手机号码';
         isValid = false;
       }
       
@@ -165,14 +277,13 @@ export default defineComponent({
     // 提交表单
     const handleSubmit = () => {
       if (validateForm()) {
-        // 创建用户对象
-        const userToSave: User = {
-          id: formData.id,
-          username: formData.username,
-          password: formData.password || (props.user?.password || ''),  // 如果编辑模式未修改密码，则保留原密码
-          name: formData.name,
-          role: formData.role
-        };
+        // 创建一个新的用户对象，避免修改原始数据
+        const userToSave: userInfo = { ...formData };
+        
+        // 如果是编辑模式且未修改密码，则不发送密码字段
+        if (props.isEdit && !formData.passwordHash) {
+          userToSave.passwordHash = props.user?.passwordHash || '';
+        }
         
         emit('save', userToSave);
       }
@@ -204,12 +315,15 @@ export default defineComponent({
 }
 
 .dialog-container {
-  width: 500px;
+  width: 600px;
   max-width: 90%;
+  max-height: 90vh;
   background-color: white;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .dialog-header {
@@ -236,10 +350,20 @@ export default defineComponent({
 
 .dialog-body {
   padding: 16px;
+  overflow-y: auto;
 }
 
 .form-group {
   margin-bottom: 16px;
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.form-row .form-group {
+  flex: 1;
 }
 
 .form-group label {

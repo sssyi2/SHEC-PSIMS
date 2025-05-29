@@ -18,7 +18,7 @@
     
     <div class="sidebar-menu">
       <router-link 
-        to="/personal-center?view=basic-info" 
+        to="/patient-personal-center/basic-info" 
         class="menu-item" 
         :class="{ 'active': activeMenu === 'basic-info' }"
       >
@@ -27,7 +27,7 @@
       </router-link>
       
       <router-link 
-        to="/personal-center?view=change-password" 
+        to="/patient-personal-center/change-password" 
         class="menu-item" 
         :class="{ 'active': activeMenu === 'change-password' }"
       >
@@ -36,7 +36,7 @@
       </router-link>
       
       <router-link 
-        to="/personal-center?view=points" 
+        to="/patient-personal-center/points" 
         class="menu-item" 
         :class="{ 'active': activeMenu === 'points' }"
       >
@@ -45,7 +45,7 @@
       </router-link>
       
       <router-link 
-        to="/personal-center?view=contact-support" 
+        to="/patient-personal-center/contact-support" 
         class="menu-item" 
         :class="{ 'active': activeMenu === 'contact-support' }"
       >
@@ -62,7 +62,7 @@
       </router-link>
       
       <router-link 
-        to="/personal-center?view=delete-account" 
+        to="/patient-personal-center/delete-account" 
         class="menu-item danger" 
         :class="{ 'active': activeMenu === 'delete-account' }"
       >

@@ -14,9 +14,9 @@
       <tbody>
         <tr v-for="user in users" :key="user.id">
           <td>{{ user.id }}</td>
-          <td>{{ user.username }}</td>
-          <td>{{ user.password }}</td>
-          <td>{{ user.name }}</td>
+          <td>{{ user.UserName }}</td>
+          <td>{{ user.passwordHash }}</td>
+          <td>{{ user.real_name }}</td>
           <td class="actions-cell">
             <button class="edit-btn" @click="$emit('edit-user', user)">修改</button>
             <button class="delete-btn" @click="$emit('delete-user', user.id)">删除</button>
@@ -33,13 +33,13 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import type { PropType } from 'vue';
-import type { User } from '@/types/user.ts';
+import type { userInfo } from '@/types/user.ts';
 
 export default defineComponent({
   name: 'UserTable',
   props: {
     users: {
-      type: Array as PropType<User[]>,
+      type: Array as PropType<userInfo[]>,
       required: true
     }
   },

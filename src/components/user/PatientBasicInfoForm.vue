@@ -8,10 +8,21 @@
     
     <form @submit.prevent="handleSubmit" class="info-form">
       <div class="form-group">
-        <label for="name">姓名：</label>
+        <label for="username">用户名：</label>
         <input 
-          id="name" 
-          v-model="form.name" 
+          id="username" 
+          v-model="form.UserName" 
+          type="text" 
+          :disabled="true" 
+          class="disabled"
+        />
+      </div>
+      
+      <div class="form-group">
+        <label for="real_name">姓名：</label>
+        <input 
+          id="real_name" 
+          v-model="form.real_name" 
           type="text" 
           :disabled="!isEditing"
           :class="{ 'editing': isEditing }"
@@ -23,7 +34,7 @@
         <div class="input-with-suffix">
           <input 
             id="age" 
-            v-model="form.age" 
+            v-model.number="form.age" 
             type="number" 
             :disabled="!isEditing"
             :class="{ 'editing': isEditing }"
@@ -46,10 +57,10 @@
       </div>
       
       <div class="form-group">
-        <label for="phone">手机号：</label>
+        <label for="phoneNumber">手机号：</label>
         <input 
-          id="phone" 
-          v-model="form.phone" 
+          id="phoneNumber" 
+          v-model="form.phoneNumber" 
           type="tel" 
           :disabled="!isEditing"
           :class="{ 'editing': isEditing }"
@@ -80,32 +91,37 @@
       <div class="form-group location-group">
         <label>所在地区：</label>
         <div class="location-inputs">
-          <select 
-            v-model="form.province" 
-            :disabled="!isEditing"
-            :class="{ 'editing': isEditing }"
-          >
-            <option value="北京">北京</option>
-            <option value="上海">上海</option>
-            <option value="广东">广东</option>
-            <!-- 其他省份选项 -->
-          </select>
-          
-          <select 
+          <input 
             v-model="form.city" 
+            type="text" 
+            placeholder="城市" 
             :disabled="!isEditing"
             :class="{ 'editing': isEditing }"
-          >
-            <option value="北京市">北京市</option>
-            <option value="上海市">上海市</option>
-            <option value="广州市">广州市</option>
-            <!-- 其他城市选项 -->
-          </select>
+          />
+          
+          <input 
+            v-model="form.area" 
+            type="text" 
+            placeholder="区/县" 
+            :disabled="!isEditing"
+            :class="{ 'editing': isEditing }"
+          />
         </div>
       </div>
       
       <div class="form-group">
-        <label for="address">联系地址：</label>
+        <label for="department">部门/科室：</label>
+        <input 
+          id="department" 
+          v-model="form.department" 
+          type="text" 
+          :disabled="!isEditing"
+          :class="{ 'editing': isEditing }"
+        />
+      </div>
+      
+      <div class="form-group">
+        <label for="address">详细地址：</label>
         <input 
           id="address" 
           v-model="form.address" 
@@ -124,14 +140,15 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, reactive, watch } from 'vue';
-import type { UserInfo } from '@/types/user';
+import { defineComponent, reactive, watch } from 'vue';
+import type { PropType } from 'vue';
+import type { userInfo } from '@/types/user';
 
 export default defineComponent({
   name: 'PatientBasicInfoForm',
   props: {
     userInfo: {
-      type: Object as PropType<UserInfo>,
+      type: Object as PropType<userInfo>,
       required: true
     },
     isEditing: {
@@ -141,59 +158,68 @@ export default defineComponent({
   },
   emits: ['edit', 'save', 'cancel'],
   setup(props, { emit }) {
-    // 表单数据
+    // 表单数据 - 根据user.ts接口调整字段
     const form = reactive({
-      name: '',
-      age: '',
+      id: 0,
+      UserName: '',
+      real_name: '',
+      age: 0,
       gender: '男',
-      phone: '',
+      phoneNumber: '',
       email: '',
       country: '中国',
-      province: '北京',
-      city: '北京市',
-      address: ''
+      city: '',
+      area: '',
+      address: '',
+      passwordHash: '',
+      role: '',
+      department: ''
     });
     
     // 监听 userInfo 变化，更新表单数据
     watch(() => props.userInfo, (newValue) => {
       if (newValue) {
-        form.name = newValue.name || '';
-        form.age = newValue.age || '';
-        form.gender = newValue.gender || '男';
-        form.phone = newValue.phone || '';
-        form.email = newValue.email || '';
-        form.country = newValue.country || '中国';
-        form.province = newValue.province || '北京';
-        form.city = newValue.city || '北京市';
-        form.address = newValue.address || '';
+        // 使用解构赋值并映射数据到表单
+        Object.assign(form, newValue);
       }
     }, { immediate: true });
     
     // 提交表单
     const handleSubmit = () => {
       // 简单的表单验证
-      if (!form.name.trim()) {
+      if (!form.real_name.trim()) {
         alert('请输入姓名');
         return;
       }
       
-      if (!form.phone.trim()) {
+      if (!form.phoneNumber.trim()) {
         alert('请输入手机号');
         return;
       }
       
-      // 提交表单数据
+      // 验证手机号格式
+      const phoneRegex = /^1[3-9]\d{9}$/;
+      if (!phoneRegex.test(form.phoneNumber)) {
+        alert('请输入正确的手机号码格式');
+        return;
+      }
+      
+      // 验证邮箱格式（如果有填写）
+      if (form.email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(form.email)) {
+          alert('请输入正确的邮箱格式');
+          return;
+        }
+      }
+      
+      // 提交表单数据 - 保持用户ID、用户名和密码不变
       emit('save', {
-        ...props.userInfo,
-        name: form.name,
-        age: form.age,
-        gender: form.gender,
-        phone: form.phone,
-        email: form.email,
-        country: form.country,
-        province: form.province,
-        city: form.city,
-        address: form.address
+        ...form,
+        id: props.userInfo.id,
+        UserName: props.userInfo.UserName,
+        passwordHash: props.userInfo.passwordHash,
+        role: props.userInfo.role
       });
     };
     
@@ -277,6 +303,10 @@ export default defineComponent({
   opacity: 0.7;
 }
 
+.form-group input.disabled {
+  background-color: #f0f0f0;
+}
+
 .form-group input.editing,
 .form-group select.editing {
   background-color: #fff;
@@ -321,7 +351,7 @@ export default defineComponent({
   gap: 10px;
 }
 
-.location-inputs select {
+.location-inputs input {
   flex: 1;
 }
 

@@ -10,7 +10,7 @@
         <router-link to="/" class="nav-item">首页</router-link>
         <router-link to="/health-records" class="nav-item">健康档案</router-link>
         <router-link to="/health-consultation" class="nav-item">健康咨询</router-link>
-        <router-link to="/personal-center" class="nav-item">个人中心</router-link>
+        <router-link to="/patient-personal-center" class="nav-item">个人中心</router-link>
       </nav>
     </div>
   </header>

@@ -17,10 +17,15 @@
         
         <ChangePasswordForm 
           v-else-if="activeMenu === 'password'" 
+          @change-password="handleChangePassword"
         />
         
         <PointsManagement 
           v-else-if="activeMenu === 'points'" 
+          :points="userPoints"
+          :points-history="pointsHistory"
+          @update:points="updatePoints"
+          @add-points-record="addPointsRecord"
         />
         
         <CustomerService 
@@ -39,6 +44,7 @@ import UserProfileForm from '@/components/user/UserProfileForm.vue'
 import ChangePasswordForm from '@/components/user/ChangePasswordForm.vue'
 import PointsManagement from '@/components/user/PointsManagement.vue'
 import CustomerService from '@/components/user/CustomerService.vue'
+import type { userInfo, PointsHistory, PasswordChangeRequest } from '@/types/user'
 
 export default defineComponent({
   name: 'PersonalCenter',
@@ -57,18 +63,49 @@ export default defineComponent({
     // 是否处于编辑状态
     const isEditing = ref(false)
     
-    // 用户信息
-    const userInfo = reactive({
-      username: '**涛',
-      age: '18',
+    // 用户信息 - 修改为符合 userInfo 接口
+    const userInfo = reactive<userInfo>({
+      id: 1,
+      UserName: 'user001',
+      age: 28,
+      email: 'user001@example.com',
+      phoneNumber: '13800138000',
+      address: '朝阳区建国路88号',
       gender: '男',
-      phone: '110',
-      email: '',
       country: '中国',
-      province: '北京',
       city: '北京市',
-      address: ''
+      area: '朝阳区',
+      passwordHash: '******',
+      real_name: '张涛',
+      role: 'user',
+      department: '内科'
     })
+    
+    // 积分相关 - 添加积分管理所需的状态
+    const userPoints = ref(120)
+    const pointsHistory = ref<PointsHistory[]>([
+      {
+        id: 1,
+        date: '2025-05-20',
+        type: 'earn',
+        points: 10,
+        description: '每日登录'
+      },
+      {
+        id: 2,
+        date: '2025-05-19',
+        type: 'earn',
+        points: 20,
+        description: '完成健康问卷'
+      },
+      {
+        id: 3,
+        date: '2025-05-15',
+        type: 'spend',
+        points: -50,
+        description: '兑换营养餐券'
+      }
+    ])
     
     // 处理菜单切换
     const handleMenuChange = (menu: string) => {
@@ -82,7 +119,7 @@ export default defineComponent({
     }
     
     // 保存用户信息
-    const saveUserInfo = (updatedInfo: any) => {
+    const saveUserInfo = (updatedInfo: userInfo) => {
       Object.assign(userInfo, updatedInfo)
       isEditing.value = false
       
@@ -90,13 +127,43 @@ export default defineComponent({
       console.log('保存用户信息:', userInfo)
     }
     
+    // 处理修改密码
+    const handleChangePassword = (passwordData: PasswordChangeRequest) => {
+      // 在实际应用中，这里应该发送请求到后端修改密码
+      console.log('修改密码:', passwordData)
+      
+      // 密码修改成功后的操作，例如显示提示或跳转
+      alert('密码修改成功，请重新登录')
+    }
+    
+    // 更新用户积分
+    const updatePoints = (newPoints: number) => {
+      userPoints.value = newPoints
+      
+      // 在实际应用中，这里应该发送请求到后端更新积分
+      console.log('更新积分:', newPoints)
+    }
+    
+    // 添加积分记录
+    const addPointsRecord = (record: PointsHistory) => {
+      pointsHistory.value.unshift(record)
+      
+      // 在实际应用中，这里应该发送请求到后端添加积分记录
+      console.log('添加积分记录:', record)
+    }
+    
     return {
       activeMenu,
       isEditing,
       userInfo,
+      userPoints,
+      pointsHistory,
       handleMenuChange,
       startEditing,
-      saveUserInfo
+      saveUserInfo,
+      handleChangePassword,
+      updatePoints,
+      addPointsRecord
     }
   }
 })

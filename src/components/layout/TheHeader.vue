@@ -12,7 +12,7 @@
         <router-link to="/warning-settings" class="nav-item">健康预警与随访管理</router-link>
         <router-link to="/data-analysis" class="nav-item">数据分析</router-link>
         <router-link to="/health-consultation" class="nav-item">健康咨询</router-link>
-        <router-link to="/personal-center" class="nav-item">个人中心</router-link>
+        <router-link to="/doctor-personal-center" class="nav-item">个人中心</router-link>
       </nav>
     </div>
   </header>

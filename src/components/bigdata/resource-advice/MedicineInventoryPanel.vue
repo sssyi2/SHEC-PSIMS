@@ -30,7 +30,7 @@
     
     <div v-else class="medicine-cards">
       <div class="medicine-card" 
-           v-for="medicine in medicineData" 
+           v-for="medicine in displayedMedicines" 
            :key="medicine.id"
            :class="{ 
              'warning-level': medicine.warningLevel === 'warning',
@@ -52,6 +52,89 @@
       </div>
     </div>
     
+    <!-- 分页控件 -->
+    <div class="pagination-container" v-if="medicineData.length > itemsPerPage">
+      <div class="pagination-info">
+        显示 {{ startIndex + 1 }}-{{ endIndex }} 条，共 {{ medicineData.length }} 条
+      </div>
+      <div class="pagination-controls">
+        <button 
+          class="pagination-button" 
+          @click="changePage(currentPage - 1)" 
+          :disabled="currentPage === 1"
+        >
+          上一页
+        </button>
+        
+        <template v-if="totalPages <= 7">
+          <button 
+            v-for="page in totalPages" 
+            :key="page" 
+            class="pagination-button" 
+            :class="{ active: currentPage === page }" 
+            @click="changePage(page)"
+          >
+            {{ page }}
+          </button>
+        </template>
+        
+        <template v-else>
+          <!-- 首页 -->
+          <button 
+            class="pagination-button" 
+            :class="{ active: currentPage === 1 }" 
+            @click="changePage(1)"
+          >
+            1
+          </button>
+          
+          <!-- 省略号 -->
+          <span v-if="currentPage > 4" class="pagination-ellipsis">...</span>
+          
+          <!-- 中间页码 -->
+          <template v-for="page in middlePages" :key="page">
+            <button 
+              class="pagination-button" 
+              :class="{ active: currentPage === page }" 
+              @click="changePage(page)"
+            >
+              {{ page }}
+            </button>
+          </template>
+          
+          <!-- 省略号 -->
+          <span v-if="currentPage < totalPages - 3" class="pagination-ellipsis">...</span>
+          
+          <!-- 尾页 -->
+          <button 
+            class="pagination-button" 
+            :class="{ active: currentPage === totalPages }" 
+            @click="changePage(totalPages)"
+          >
+            {{ totalPages }}
+          </button>
+        </template>
+        
+        <button 
+          class="pagination-button" 
+          @click="changePage(currentPage + 1)" 
+          :disabled="currentPage === totalPages"
+        >
+          下一页
+        </button>
+      </div>
+      
+      <div class="pagination-size-selector">
+        <span>每页显示：</span>
+        <select v-model="itemsPerPage" @change="handlePerPageChange">
+          <option :value="6">6 条</option>
+          <option :value="9">9 条</option>
+          <option :value="12">12 条</option>
+          <option :value="24">24 条</option>
+        </select>
+      </div>
+    </div>
+    
     <div class="panel-footer" v-if="medicineData.length > 0">
       <button class="export-button" @click="exportInventory">导出报表</button>
     </div>
@@ -59,7 +142,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted } from 'vue'
+import { defineComponent, ref, onMounted, computed } from 'vue'
 import { 
   getAllMedicineInventory, 
   searchMedicineInventory, 
@@ -77,6 +160,76 @@ export default defineComponent({
     const loading = ref(false)
     const error = ref('')
     
+    // 分页相关状态
+    const currentPage = ref(1)
+    const itemsPerPage = ref(6)
+    
+    // 计算总页数
+    const totalPages = computed(() => {
+      return Math.ceil(medicineData.value.length / itemsPerPage.value)
+    })
+    
+    // 计算当前页显示的药品
+    const displayedMedicines = computed(() => {
+      const start = (currentPage.value - 1) * itemsPerPage.value
+      const end = start + itemsPerPage.value
+      return medicineData.value.slice(start, end)
+    })
+    
+    // 计算当前显示的开始和结束索引
+    const startIndex = computed(() => {
+      return (currentPage.value - 1) * itemsPerPage.value
+    })
+    
+    const endIndex = computed(() => {
+      const end = startIndex.value + itemsPerPage.value
+      return end > medicineData.value.length ? medicineData.value.length : end
+    })
+    
+    // 计算中间显示的页码
+    const middlePages = computed(() => {
+      if (totalPages.value <= 7) return []
+      
+      let start, end
+      
+      if (currentPage.value <= 4) {
+        start = 2
+        end = 6
+      } else if (currentPage.value >= totalPages.value - 3) {
+        start = totalPages.value - 5
+        end = totalPages.value - 1
+      } else {
+        start = currentPage.value - 2
+        end = currentPage.value + 2
+      }
+      
+      // 确保页码在有效范围内
+      start = Math.max(2, start)
+      end = Math.min(totalPages.value - 1, end)
+      
+      const pages = []
+      for (let i = start; i <= end; i++) {
+        pages.push(i)
+      }
+      return pages
+    })
+    
+    // 切换页码
+    const changePage = (page: number) => {
+      if (page < 1 || page > totalPages.value) return
+      currentPage.value = page
+      
+      // 如果当前页已经没有数据（可能是因为更改了每页条数），则回到第一页
+      if (startIndex.value >= medicineData.value.length) {
+        currentPage.value = 1
+      }
+    }
+    
+    // 改变每页显示条数
+    const handlePerPageChange = () => {
+      currentPage.value = 1  // 重置到第一页
+    }
+    
     // 获取所有药品库存数据
     const fetchMedicineInventory = async () => {
       loading.value = true
@@ -84,6 +237,7 @@ export default defineComponent({
       
       try {
         medicineData.value = await getAllMedicineInventory()
+        currentPage.value = 1  // 重置到第一页
       } catch (err: any) {
         error.value = err.message || '获取药品库存数据失败'
         console.error('获取药品库存数据失败:', err)
@@ -115,6 +269,7 @@ export default defineComponent({
       
       try {
         medicineData.value = await searchMedicineInventory(searchQuery.value)
+        currentPage.value = 1  // 重置到第一页
       } catch (err: any) {
         error.value = err.message || '搜索药品失败'
         console.error('搜索药品失败:', err)
@@ -161,7 +316,18 @@ export default defineComponent({
       searchMedicine,
       getWarningClass,
       exportInventory,
-      fetchAllData
+      fetchAllData,
+      
+      // 分页相关
+      currentPage,
+      itemsPerPage,
+      totalPages,
+      displayedMedicines,
+      startIndex,
+      endIndex,
+      middlePages,
+      changePage,
+      handlePerPageChange
     }
   }
 })
@@ -358,6 +524,84 @@ export default defineComponent({
   cursor: pointer;
 }
 
+/* 分页样式 */
+.pagination-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding: 10px 0;
+  border-top: 1px solid #f0f0f0;
+}
+
+.pagination-info {
+  color: #666;
+  font-size: 14px;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+}
+
+.pagination-button {
+  min-width: 32px;
+  height: 32px;
+  margin: 0 4px;
+  padding: 0 8px;
+  line-height: 30px;
+  text-align: center;
+  background-color: #fff;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.3s;
+}
+
+.pagination-button:hover:not(:disabled) {
+  color: #1890ff;
+  border-color: #1890ff;
+}
+
+.pagination-button:disabled {
+  color: rgba(0, 0, 0, 0.25);
+  border-color: #d9d9d9;
+  cursor: not-allowed;
+}
+
+.pagination-button.active {
+  color: #fff;
+  background-color: #1890ff;
+  border-color: #1890ff;
+}
+
+.pagination-ellipsis {
+  display: inline-block;
+  width: 24px;
+  line-height: 32px;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.25);
+  font-size: 12px;
+}
+
+.pagination-size-selector {
+  display: flex;
+  align-items: center;
+  color: #666;
+  font-size: 14px;
+}
+
+.pagination-size-selector select {
+  margin-left: 8px;
+  padding: 4px 8px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  background-color: #fff;
+  outline: none;
+}
+
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
@@ -377,6 +621,16 @@ export default defineComponent({
   
   .medicine-card, .medicine-advice-card {
     width: 100%;
+  }
+  
+  .pagination-container {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .pagination-controls {
+    flex-wrap: wrap;
+    justify-content: center;
   }
 }
 </style>
